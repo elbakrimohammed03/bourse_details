@@ -2,8 +2,8 @@ name: Collecte Bourse Fondamentale
 
 on:
   schedule:
-    - cron: '45 16 * * 1-5' # S'exécute à 16h45 UTC (pour passer après le premier robot)
-  workflow_dispatch:      # Permet de lancer le robot manuellement
+    - cron: '45 16 * * 1-5' # Exécution à 16h45 UTC (du lundi au vendredi)
+  workflow_dispatch:      # Permet le lancement manuel via l'onglet Actions
 
 jobs:
   run_script:
@@ -19,10 +19,18 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
+        # Ajout de numpy pour corriger l'erreur JSON "Out of range float"
         run: |
           python -m pip install --upgrade pip
-          pip install pandas requests beautifulsoup4 lxml supabase
+          pip install pandas requests beautifulsoup4 lxml supabase numpy
 
       - name: Run script
-        # Note : Bien que les clés soient dans le script, nous gardons une structure propre
+        # Le script utilise les clés intégrées directement dans le code
         run: python collecte_bourse.py
+
+      - name: Upload artifacts if failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-erreur
+          path: ./*.log
