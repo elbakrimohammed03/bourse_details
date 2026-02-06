@@ -2,25 +2,27 @@ name: Collecte Bourse Fondamentale
 
 on:
   schedule:
-    - cron: '30 16 * * 1-5'
-  workflow_dispatch:
+    - cron: '45 16 * * 1-5' # S'exécute à 16h45 UTC (pour passer après le premier robot)
+  workflow_dispatch:      # Permet de lancer le robot manuellement
 
 jobs:
   run_script:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
-      
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-          
-      - name: Install libs
-        run: pip install pandas requests beautifulsoup4 lxml supabase
-        
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests beautifulsoup4 lxml supabase
+
       - name: Run script
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        # Note : Bien que les clés soient dans le script, nous gardons une structure propre
         run: python collecte_bourse.py
