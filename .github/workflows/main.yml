@@ -1,26 +1,26 @@
-name: Collecte Bourse
+name: Collecte Bourse Fondamentale
+
 on:
   schedule:
-    - cron: '30 16 * * 1-5' # Du lundi au vendredi à 16h30 UTC
-  workflow_dispatch: # Permet de lancer à la main
+    - cron: '30 16 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   run_script:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          
       - name: Install libs
-        run: pip install -r requirements.txt
+        run: pip install pandas requests beautifulsoup4 lxml supabase
+        
       - name: Run script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python collecte_bourse.py
-      - name: Commit data
-        run: |
-          git config --global user.name 'Robot'
-          git config --global user.email 'robot@github.com'
-          git add bourse_casablanca_historique.csv
-          git commit -m "Auto-update $(date)" || exit 0
-          git push
